@@ -1,5 +1,5 @@
 const prisma = require('../lib/prisma');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Register a new user
@@ -27,7 +27,7 @@ const register = async (req, res) => {
             data: {
                 username,
                 email,
-                password: hashedPassword,               
+                passwordHash: hashedPassword,               
             },
         });
 
@@ -65,7 +65,7 @@ const login = async (req, res) => {
         }
 
         // Check password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
         if (!isMatch) {
             return res.status(400).json({ error: 'Invalid Credentials' });
         }
