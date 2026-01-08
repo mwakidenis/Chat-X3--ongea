@@ -6,11 +6,13 @@ const Login = () => {
     const [email, setEmail] = useState(""); // Stores what the user types in the email field
     const [password, setPassword] = useState(""); // Stores what the user types in the password field
     const [error, setError] = useState(""); // Stores error message if login fails
+    const [loading, setLoading] = useState(false); // Shows "Logging in..." while waiting for response
     const { login } = useAuth(); // shows "Loggin in..." while waiting for response
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setLoading(true);
 
         try {
             await login(email, password);
