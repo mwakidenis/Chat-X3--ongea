@@ -72,6 +72,31 @@ const socketHandler = (io) => {
             }
         });
 
+        // Mark message as read
+        socket.on('mark-read', async (data) => {
+            try {
+                const { conversationId, readerId } = data;
+
+                // Update all unread messages in this conversation (not sent by the reader) to read
+                await prisma.message.updateMany({
+                    where: {
+                        conversationId,
+                        senderId: { not: readerId },
+                        isRead: false,
+                    },
+                    data: { isRead: true },
+                });
+
+                // Notify the other user that their messages were read
+                socket.to(conversationId).emit('messages-read', {
+                    conversationId,
+                    readerId,
+                });
+            } catch (error) {
+                console.error('Error marking messages as read:', error);
+            }
+        })
+
         // Typing indicator
         socket.on('typing-start', (conversationId) => {
             socket.to(conversationId).emit('user-typing', {

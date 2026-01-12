@@ -30,6 +30,8 @@ const ChatWindow = ({ conversation, currentUserId }) => {
             socket.on('new-message', (message) => {
                 if (message.conversationId === conversation.id) {
                     setMessages((prev) => [...prev, message]);
+                    // Mark as read if we're viewing the conversation
+                    markMessagesAsRead();
                 }
             });
 
@@ -61,6 +63,28 @@ const ChatWindow = ({ conversation, currentUserId }) => {
         }
     }, [socket, conversation]);
 
+    // Listen for read receipts
+    useEffect(() => {
+        if (socket && conversation) {
+            socket.on('messages-read', (data) => {
+                if (data.conversationId === conversation.id) {
+                    // Mark all my messages as read
+                    setMessages((prev) => 
+                        prev.map((msg) => 
+                            msg.senderId === currentUserId
+                                ? { ...msg, isRead: true }
+                                : msg
+                        )
+                    );
+                }
+            });
+
+            return () => {
+                socket.off('messages-read');
+            };
+        }
+    }, [socket, conversation, currentUserId]);
+
     // Scroll to bottom when messages update
     useEffect(() => {
         scrollToBottom();
@@ -72,6 +96,7 @@ const ChatWindow = ({ conversation, currentUserId }) => {
         try {
             const res = await api.get(`/chat/conversations/${conversation.id}/messages`);
             setMessages(res.data);
+            markMessagesAsRead(); // Mark messages as read when loaded
         } catch (err) {
             console.error('Failed to fetch messages:', err);
         } finally {
@@ -110,6 +135,16 @@ const ChatWindow = ({ conversation, currentUserId }) => {
             socket.emit('typing-stop', conversation.id);
         }, 2000);
     };
+
+    // Mark messages as read when conversation is viewed
+    const markMessagesAsRead = () => {
+        if (socket && conversation && currentUserId) {
+            socket.emit('mark-read', {
+                conversationId: conversation.id,
+                readerId: currentUserId,
+            });
+        }
+    }
 
     // Get other participant's info
     const getOtherUser = () => {
@@ -161,7 +196,7 @@ const ChatWindow = ({ conversation, currentUserId }) => {
                         No messages yet. Say hello! 👋
                     </div>
                 ) : (
-                    messages.map((message) => {
+                   messages.map((message) => {
                         const isMe = message.senderId === currentUserId;
                         return (
                             <div
@@ -172,26 +207,34 @@ const ChatWindow = ({ conversation, currentUserId }) => {
                                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                                         isMe
                                             ? 'bg-blue-500 text-white rounded-br-none'
-                                            : 'bg-white border rounded-bl-none'
+                                            : 'bg-white dark:bg-gray-700 border dark:border-gray-600 dark:text-white rounded-bl-none'
                                     }`}
                                 >
                                     <p>{message.content}</p>
-                                    <p
-                                        className={`text-xs mt-1 ${
-                                            isMe ? 'text-blue-100' : 'text-gray-400'
-                                        }`}
-                                    >
-                                        {new Date(message.createdAt).toLocaleTimeString([], {
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}
-                                    </p>
+                                    <div className={`flex items-center justify-end gap-1 mt-1`}>
+                                        <p
+                                            className={`text-xs ${
+                                                isMe ? 'text-blue-100' : 'text-gray-400'
+                                            }`}
+                                        >
+                                            {new Date(message.createdAt).toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </p>
+                                        {/* Read Receipt Checkmarks - only for my messages */}
+                                        {isMe && (
+                                            <span className={`text-xs ${message.isRead ? 'text-blue-200' : 'text-blue-300'}`}>
+                                                {message.isRead ? '✓✓' : '✓'}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );
                     })
                 )}
-
+                
                 {/* Typing Indicator */}
                 {isTyping && (
                     <div className="flex justify-start">
