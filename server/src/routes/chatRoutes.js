@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, getOrCreateChat, getUserChats, getChatMessages, sendMessage } = require('../controllers/chatController');
+const { getAllUsers, getOrCreateChat, getUserChats, getChatMessages, sendMessage, sendFileMessage } = require('../controllers/chatController');
 const authMiddleware = require('../middleware/auth');
+const { uploadMessageFile } = require('../middleware/upload');
 
 // All routes here require authentication
 router.use(authMiddleware);
@@ -20,5 +21,8 @@ router.get('/conversations/:conversationId/messages', getChatMessages);
 
 // Send a message in a chat
 router.post('/messages', sendMessage);
+
+// send a file/image message
+router.post('/messages/file', uploadMessageFile.single('file'), sendFileMessage);
 
 module.exports = router;

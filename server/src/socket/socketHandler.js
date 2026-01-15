@@ -44,14 +44,19 @@ const socketHandler = (io) => {
         // Handle sending messages
         socket.on('send-message', async (data) => {
             try {
-                const { conversationId, content } = data;
+                const { conversationId, content, fileUrl, fileName, fileType, fileMimeType, fileSize } = data;
 
                 // save message to DataBase
                 const message = await prisma.message.create({
                     data: {
                         conversationId,
                         senderId: socket.userId,
-                        content,
+                        content: content || null,
+                        fileUrl: fileUrl || null,
+                        fileName: fileName || null,
+                        fileType: fileType || null,
+                        fileMimeType: fileMimeType || null,
+                        fileSize: fileSize || null,
                     },
                     include: {
                         sender: {

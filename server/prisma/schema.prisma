@@ -52,12 +52,15 @@ model Message {
   id             String   @id @default(uuid())
   conversationId String   @map("conversation_id")
   senderId       String   @map("sender_id")
-  content        String
+  content        String?                              // Changed: now optional (? added)
+  fileUrl        String?  @map("file_url")            // NEW
+  fileName       String?  @map("file_name")           // NEW
+  fileType       String?  @map("file_type")           // NEW: "image" or "document"
+  fileMimeType   String?  @map("file_mime_type")      // NEW: "image/png", "application/pdf"
+  fileSize       Int?     @map("file_size")           // NEW: size in bytes
   isRead         Boolean  @default(false) @map("is_read")
   createdAt      DateTime @default(now()) @map("created_at")
   
   conversation Conversation @relation(fields: [conversationId], references: [id])
   sender       User         @relation(fields: [senderId], references: [id])
-
-  @@map("messages")
 }

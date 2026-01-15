@@ -184,10 +184,58 @@ const sendMessage = async (req, res) => {
     }
 };
 
+// send file/image message
+const sendFileMessage = async (req, res) => {
+    try {
+        const { conversationId, content } = req.body;
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Determine file type (image or document)
+        const isImage = req.file.mimetype.startsWith('image/');
+        const fileType = isImage ? 'image' : 'document';
+
+        const message = await prisma.message.create({
+            data: {
+                conversationId,
+                senderId: req.user.userId,
+                content: content || '', // Optional text content
+                fileUrl: `/uploads/messages/${req.file.filename}`,
+                fileName: req.file.originalname,
+                fileType: fileType,
+                fileMimeType: req.file.mimetype,
+                fileSize: req.file.size,
+            },
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        username: true,
+                        email: true,
+                        avatarUrl: true,
+                    }
+                }
+            }
+        });
+
+        // Emit socket event for real-time update
+        const io = req.app.get('io');
+        io.to(conversationId).emit('new-message', message);
+
+        res.status(201).json(message);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
 module.exports = {
     getAllUsers,
     getOrCreateChat,
     getUserChats,
     getChatMessages,
     sendMessage,
+    sendFileMessage,
 };
