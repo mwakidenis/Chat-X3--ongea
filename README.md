@@ -258,22 +258,22 @@ model Message {
 ## 🎨 Screenshots
 
 ### Login Page
-<img src="screenshots/login.png" alt="Login" width="600">
+![Login](./screenshots/login.png)
 
 ### Chat Interface (Light Mode)
-<img src="screenshots/chat-light.png" alt="Chat Light Mode" width="600">
+![Chat Light Mode](./screenshots/chat-light.png)
 
 ### Chat Interface (Dark Mode)
-<img src="screenshots/chat-dark.png" alt="Chat Dark Mode" width="600">
+![Chat Dark Mode](./screenshots/chat-dark.png)
 
 ### Group Chat
-<img src="screenshots/group-chat.png" alt="Group Chat" width="600">
+![Group Chat](./screenshots/group-chat.png)
 
 ### File & Image Sharing
-<img src="screenshots/file-image-sharing.png" alt="File Image Sharing" width="600">
+![File Image Sharing](./screenshots/file-image-sharing.png)
 
 ### Typing Indicator
-<img src="screenshots/typing-indicator.png" alt="Typing Indicator" width="600">
+![Typing Indicator](./screenshots/typing-indicator.png)
 
 ## 🔮 Future Enhancements
 
