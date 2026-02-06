@@ -290,8 +290,8 @@ model Message {
 
 ## 👨‍💻 Author
 
-**m-bwela**
-- GitHub: [@m-bwela](https://github.com/m-bwela)
+**mwakidenis**
+- GitHub: [@mwakidenis](https://github.com/mwakidenis)
 
 
 ## 📄 License
